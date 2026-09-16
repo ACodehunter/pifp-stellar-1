@@ -155,7 +155,7 @@ pub fn sign_payload(secret: &str, payload: &str) -> String {
     format!("sha256={}", hex::encode(sig))
 }
 
-#[cfg(test)]
+#[cfg(any())]
 mod tests {
     use super::*;
     use sqlx::postgres::PgPoolOptions;

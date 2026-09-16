@@ -43,9 +43,9 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 use crate::config::Config;
 use crate::errors::{OracleError, Result};
-use axum::extract::DefaultBodyLimit;
 use crate::metrics::OracleMetrics;
 use crate::tx_diagnostics::TxDiagnosticsStore;
+use axum::extract::DefaultBodyLimit;
 
 const MAX_CONCURRENT_PROOFS: usize = 5;
 
