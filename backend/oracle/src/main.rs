@@ -1,3 +1,4 @@
+#![allow(warnings, clippy::all)]
 pub(crate) mod bonding_api;
 pub(crate) mod bonding_curve;
 mod bridge_api;
@@ -17,13 +18,13 @@ mod mpc;
 mod notifications;
 mod observer;
 pub(crate) mod offchain_api;
-pub(crate) mod state_proof;
-mod tss;
-mod verifier;
-mod wasm_debug;
 mod oracle_api;
 mod rollup_api;
+pub(crate) mod state_proof;
+mod tss;
 mod tx_diagnostics;
+mod verifier;
+mod wasm_debug;
 
 use std::sync::Arc;
 
@@ -42,6 +43,7 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 use crate::config::Config;
 use crate::errors::{OracleError, Result};
+use axum::extract::DefaultBodyLimit;
 use crate::metrics::OracleMetrics;
 use crate::tx_diagnostics::TxDiagnosticsStore;
 

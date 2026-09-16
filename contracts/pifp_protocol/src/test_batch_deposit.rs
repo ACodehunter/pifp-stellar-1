@@ -97,9 +97,9 @@ fn register(
                 &deadline,
                 &false,
                 &milestones,
-                &0u32,          // categories
+                &0u32,                     // categories
                 &Vec::<Address>::new(env), // authorized_oracles
-                &0u32,          // threshold
+                &0u32,                     // threshold
             )
                 .into_val(env),
             sub_invokes: &[],

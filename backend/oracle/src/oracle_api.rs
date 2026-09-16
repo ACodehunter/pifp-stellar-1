@@ -1,4 +1,4 @@
-﻿//! Pluggable Oracle Aggregator – concurrent multi-provider price fetching with
+//! Pluggable Oracle Aggregator – concurrent multi-provider price fetching with
 //! medianizer-based outlier filtering, staleness detection, variance scoring,
 //! and a health-score endpoint consumed by the frontend staleness-recovery UI.
 
@@ -177,7 +177,8 @@ impl OracleApiState {
         let now = now_unix();
 
         if let Some(cached) = self.cache.lock().unwrap().clone() {
-            if now.saturating_sub(cached.updated_at_unix) < self.runtime.refresh_interval.as_secs() {
+            if now.saturating_sub(cached.updated_at_unix) < self.runtime.refresh_interval.as_secs()
+            {
                 return self.materialize(cached, now);
             }
         }
@@ -326,7 +327,8 @@ impl OracleApiState {
         };
 
         let stale_penalty = if stale {
-            let overshoot = max_sample_age_secs.saturating_sub(self.runtime.max_staleness_secs) as f64;
+            let overshoot =
+                max_sample_age_secs.saturating_sub(self.runtime.max_staleness_secs) as f64;
             40.0 + (overshoot / self.runtime.max_staleness_secs.max(1) as f64 * 20.0).min(20.0)
         } else {
             (max_sample_age_secs as f64 / self.runtime.max_staleness_secs.max(1) as f64) * 12.0
@@ -339,8 +341,16 @@ impl OracleApiState {
             (cached.variance_pct / self.runtime.max_variance_pct.max(0.1)) * 18.0
         };
 
-        let availability_penalty = if cached.aggregated_price.is_some() { 0.0 } else { 55.0 };
-        let refresh_penalty = if cached.refresh_error.is_some() { 10.0 } else { 0.0 };
+        let availability_penalty = if cached.aggregated_price.is_some() {
+            0.0
+        } else {
+            55.0
+        };
+        let refresh_penalty = if cached.refresh_error.is_some() {
+            10.0
+        } else {
+            0.0
+        };
 
         let raw_score = 100.0
             - stale_penalty
@@ -350,8 +360,18 @@ impl OracleApiState {
             - refresh_penalty;
         let health_score = raw_score.clamp(0.0, 100.0).round() as u8;
 
-        let indicator = if health_score >= 80 { "green" } else if health_score >= 55 { "yellow" } else { "red" };
-        let status = match indicator { "green" => "healthy", "yellow" => "degraded", _ => "critical" };
+        let indicator = if health_score >= 80 {
+            "green"
+        } else if health_score >= 55 {
+            "yellow"
+        } else {
+            "red"
+        };
+        let status = match indicator {
+            "green" => "healthy",
+            "yellow" => "degraded",
+            _ => "critical",
+        };
 
         let mut reasons: Vec<String> = Vec::new();
         if cached.aggregated_price.is_none() {
@@ -493,8 +513,8 @@ async fn fetch_provider_sample(client: Client, provider: OracleProvider) -> Prov
 
 impl ProviderParser {
     fn parse_price(self, body: &str) -> Result<f64, String> {
-        let value: serde_json::Value = serde_json::from_str(body)
-            .map_err(|e| format!("Invalid JSON payload: {e}"))?;
+        let value: serde_json::Value =
+            serde_json::from_str(body).map_err(|e| format!("Invalid JSON payload: {e}"))?;
 
         let price: Option<f64> = match self {
             ProviderParser::CoinGecko => value
@@ -536,11 +556,19 @@ fn median_price(samples: &[ProviderSample]) -> f64 {
 }
 
 fn relative_deviation(value: f64, reference: f64) -> f64 {
-    if reference == 0.0 { 0.0 } else { (value - reference).abs() / reference.abs() }
+    if reference == 0.0 {
+        0.0
+    } else {
+        (value - reference).abs() / reference.abs()
+    }
 }
 
-fn round_two_decimals(v: f64) -> f64 { (v * 100.0).round() / 100.0 }
-fn round_four_decimals(v: f64) -> f64 { (v * 10_000.0).round() / 10_000.0 }
+fn round_two_decimals(v: f64) -> f64 {
+    (v * 100.0).round() / 100.0
+}
+fn round_four_decimals(v: f64) -> f64 {
+    (v * 10_000.0).round() / 10_000.0
+}
 
 fn now_unix() -> u64 {
     chrono::Utc::now().timestamp().max(0) as u64
@@ -568,8 +596,11 @@ mod tests {
             oracle_refresh_secs: 15,
             oracle_max_staleness_secs: 90,
             oracle_max_variance_pct: 5.0,
-            oracle_coingecko_url: "https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd".to_string(),
-            oracle_binance_url: "https://api.binance.com/api/v3/ticker/price?symbol=XLMUSDT".to_string(),
+            oracle_coingecko_url:
+                "https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd"
+                    .to_string(),
+            oracle_binance_url: "https://api.binance.com/api/v3/ticker/price?symbol=XLMUSDT"
+                .to_string(),
             oracle_kraken_url: "https://api.kraken.com/0/public/Ticker?pair=XLMUSD".to_string(),
             foreign_rpc_url: None,
             foreign_bridge_address: None,
@@ -582,7 +613,11 @@ mod tests {
     }
 
     fn sample(provider: &str, price: f64) -> ProviderSample {
-        ProviderSample { provider: provider.to_string(), price, observed_at_unix: now_unix() }
+        ProviderSample {
+            provider: provider.to_string(),
+            price,
+            observed_at_unix: now_unix(),
+        }
     }
 
     fn obs(provider: &str, price: Option<f64>, used: bool) -> CachedProviderObservation {
@@ -659,7 +694,10 @@ mod tests {
         assert!(snap.stale);
         assert!(snap.high_variance);
         assert_eq!(snap.indicator, "red");
-        assert!(snap.reasons.iter().any(|r| r.contains("Latest refresh attempt failed")));
+        assert!(snap
+            .reasons
+            .iter()
+            .any(|r| r.contains("Latest refresh attempt failed")));
     }
 
     #[test]
@@ -707,18 +745,32 @@ mod tests {
 
     #[test]
     fn parser_rejects_zero_price() {
-        assert!(ProviderParser::CoinGecko.parse_price(r#"{"stellar":{"usd":0}}"#).is_err());
+        assert!(ProviderParser::CoinGecko
+            .parse_price(r#"{"stellar":{"usd":0}}"#)
+            .is_err());
     }
 
     #[tokio::test]
     async fn refresh_aggregates_mocked_provider_responses() {
         let mut server = mockito::Server::new_async().await;
-        let _cg = server.mock("GET", "/coingecko").with_status(200)
-            .with_body(r#"{"stellar":{"usd":0.102}}"#).create_async().await;
-        let _bn = server.mock("GET", "/binance").with_status(200)
-            .with_body(r#"{"price":"0.101"}"#).create_async().await;
-        let _kr = server.mock("GET", "/kraken").with_status(200)
-            .with_body(r#"{"result":{"XXLMZUSD":{"c":["0.115","1"]}}}"#).create_async().await;
+        let _cg = server
+            .mock("GET", "/coingecko")
+            .with_status(200)
+            .with_body(r#"{"stellar":{"usd":0.102}}"#)
+            .create_async()
+            .await;
+        let _bn = server
+            .mock("GET", "/binance")
+            .with_status(200)
+            .with_body(r#"{"price":"0.101"}"#)
+            .create_async()
+            .await;
+        let _kr = server
+            .mock("GET", "/kraken")
+            .with_status(200)
+            .with_body(r#"{"result":{"XXLMZUSD":{"c":["0.115","1"]}}}"#)
+            .create_async()
+            .await;
 
         let mut config = test_config();
         config.oracle_coingecko_url = format!("{}/coingecko", server.url());
@@ -729,7 +781,11 @@ mod tests {
         let cached = state.refresh().await.expect("refresh should succeed");
 
         assert!(cached.aggregated_price.is_some());
-        let contrib = cached.providers.iter().filter(|p| p.used_in_aggregation).count();
+        let contrib = cached
+            .providers
+            .iter()
+            .filter(|p| p.used_in_aggregation)
+            .count();
         assert_eq!(contrib, 2);
         assert!(cached.providers.iter().any(|p| p.status == "outlier"));
     }
@@ -737,9 +793,21 @@ mod tests {
     #[tokio::test]
     async fn refresh_returns_err_when_all_providers_fail() {
         let mut server = mockito::Server::new_async().await;
-        let _cg = server.mock("GET", "/coingecko").with_status(500).create_async().await;
-        let _bn = server.mock("GET", "/binance").with_status(500).create_async().await;
-        let _kr = server.mock("GET", "/kraken").with_status(500).create_async().await;
+        let _cg = server
+            .mock("GET", "/coingecko")
+            .with_status(500)
+            .create_async()
+            .await;
+        let _bn = server
+            .mock("GET", "/binance")
+            .with_status(500)
+            .create_async()
+            .await;
+        let _kr = server
+            .mock("GET", "/kraken")
+            .with_status(500)
+            .create_async()
+            .await;
 
         let mut config = test_config();
         config.oracle_coingecko_url = format!("{}/coingecko", server.url());

@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use axum::{
+    extract::Path,
     http::{header, StatusCode},
     response::IntoResponse,
     routing::get,
     Json, Router,
-    extract::Path,
 };
 use serde::Serialize;
 use tokio::net::TcpListener;
@@ -44,9 +44,7 @@ async fn metrics_handler() -> impl IntoResponse {
     )
 }
 
-async fn get_tx_diagnostics(
-    Path(hash): Path<String>,
-) -> impl IntoResponse {
+async fn get_tx_diagnostics(Path(hash): Path<String>) -> impl IntoResponse {
     let store = TxDiagnosticsStore::new();
     if let Some(payload) = store.get(&hash) {
         return (StatusCode::OK, Json(payload)).into_response();

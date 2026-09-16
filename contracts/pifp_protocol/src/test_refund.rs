@@ -123,10 +123,10 @@ fn test_refund_success_after_expiry() {
             dummy_metadata_uri(&env),
             deadline,
             false,
-            &milestones,                 // milestones
-            0u32,                        // categories
+            &milestones,                            // milestones
+            0u32,                                   // categories
             soroban_sdk::Vec::<Address>::new(&env), // authorized_oracles
-            0u32,                        // threshold
+            0u32,                                   // threshold
         ),
     );
     let project = client.register_project(

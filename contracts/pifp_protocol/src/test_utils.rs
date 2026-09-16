@@ -147,9 +147,9 @@ impl TestContext {
                 &deadline,
                 &is_private,
                 &milestones,
-                &0u32,                       // categories
+                &0u32,                           // categories
                 &Vec::<Address>::new(&self.env), // authorized_oracles
-                &0u32,                       // threshold
+                &0u32,                           // threshold
             ),
         );
 

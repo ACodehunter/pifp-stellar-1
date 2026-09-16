@@ -31,9 +31,7 @@ pub fn router(state: Arc<BridgeState>) -> Router {
         .with_state(state)
 }
 
-async fn get_messages(
-    State(state): State<Arc<BridgeState>>,
-) -> Json<Vec<BridgeMessage>> {
+async fn get_messages(State(state): State<Arc<BridgeState>>) -> Json<Vec<BridgeMessage>> {
     let messages = state.messages.lock().unwrap();
     Json(messages.values().cloned().collect())
 }

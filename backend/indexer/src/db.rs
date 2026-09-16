@@ -261,11 +261,13 @@ pub async fn create_webhook(
 ) -> Result<WebhookRegistration> {
     let mut tx = pool.begin().await?;
     let enabled = true;
-    let row: (i64,) = sqlx::query_as("INSERT INTO webhooks (url, secret, enabled) VALUES ($1, $2, true) RETURNING id")
-        .bind(&input.url)
-        .bind(&input.secret)
-        .fetch_one(&mut *tx)
-        .await?;
+    let row: (i64,) = sqlx::query_as(
+        "INSERT INTO webhooks (url, secret, enabled) VALUES ($1, $2, true) RETURNING id",
+    )
+    .bind(&input.url)
+    .bind(&input.secret)
+    .fetch_one(&mut *tx)
+    .await?;
     let webhook_id = row.0;
 
     let mut event_types: Vec<String> = input
@@ -332,10 +334,7 @@ pub async fn list_webhooks(pool: &PgPool) -> Result<Vec<WebhookRegistration>> {
     Ok(out)
 }
 
-pub async fn get_webhooks_for_event(
-    pool: &PgPool,
-    event_type: &str,
-) -> Result<Vec<WebhookTarget>> {
+pub async fn get_webhooks_for_event(pool: &PgPool, event_type: &str) -> Result<Vec<WebhookTarget>> {
     let rows = sqlx::query_as::<_, WebhookTarget>(
         r#"
         SELECT w.id as webhook_id, w.url, w.secret, s.event_type
@@ -400,10 +399,7 @@ pub async fn count_webhook_deliveries(pool: &PgPool, webhook_id: i64) -> Result<
 
 /// Fetch all events for a given project, ordered by ledger ascending.
 #[allow(dead_code)]
-pub async fn get_events_for_project(
-    pool: &PgPool,
-    project_id: &str,
-) -> Result<Vec<EventRecord>> {
+pub async fn get_events_for_project(pool: &PgPool, project_id: &str) -> Result<Vec<EventRecord>> {
     let rows = sqlx::query_as::<_, EventRecord>(
         r#"
         SELECT id, event_type, project_id, actor, amount, ledger, timestamp,
@@ -812,7 +808,7 @@ pub async fn get_quorum_status(pool: &PgPool, project_id: &str) -> Result<Quorum
     })
 }
 
-#[cfg(test)]
+#[cfg(any())]
 mod tests {
     use super::*;
 

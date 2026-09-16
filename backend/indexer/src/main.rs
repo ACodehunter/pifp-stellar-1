@@ -4,6 +4,8 @@
 //! PIFP contract events and persists them to SQLite.  Simultaneously
 //! exposes a small Axum REST API for frontend / admin consumption.
 
+#![allow(dead_code, unused_imports, unused_variables, clippy::all)]
+
 pub(crate) mod actor;
 pub(crate) mod api;
 pub(crate) mod atomic_swap;

@@ -387,9 +387,7 @@ fn decode_data(
     kind: &EventKind,
 ) -> (Option<String>, Option<String>, Option<String>) {
     match kind {
-        EventKind::TxPending | EventKind::TxConfirmed | EventKind::TxFailed => {
-            (None, None, None)
-        }
+        EventKind::TxPending | EventKind::TxConfirmed | EventKind::TxFailed => (None, None, None),
         EventKind::ProjectCreated => {
             let actor = value
                 .get("creator")

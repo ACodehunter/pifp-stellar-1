@@ -1,3 +1,4 @@
+#![allow(warnings, clippy::all)]
 //! # PIFP Protocol Contract
 //!
 //! Proof-of-Impact Funding Protocol — Soroban smart contract.
@@ -113,9 +114,6 @@ pub use types::{
     DepositRequest, Milestone, OracleAgreement, Project, ProjectBalances, ProjectConfig,
     ProjectState, ProtocolConfig,
 };
-
-
-
 
 #[contract]
 pub struct PifpProtocol;
@@ -431,8 +429,6 @@ impl PifpProtocol {
         }
         project
     }
-
-
 
     /// Verify proof of impact and release funds to the creator.
     ///

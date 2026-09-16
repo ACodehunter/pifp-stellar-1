@@ -1,6 +1,9 @@
 extern crate std;
 
-use soroban_sdk::{testutils::{Address as _, Events}, vec, BytesN, Env, IntoVal, Vec};
+use soroban_sdk::{
+    testutils::{Address as _, Events},
+    vec, BytesN, Env, IntoVal, Vec,
+};
 
 use crate::test_utils::TestContext;
 

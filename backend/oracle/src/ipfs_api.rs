@@ -24,7 +24,9 @@ pub struct IpfsState {
 }
 
 pub fn router(state: Arc<IpfsState>) -> Router {
-    Router::new().route("/ipfs/upload", post(upload_file)).with_state(state)
+    Router::new()
+        .route("/ipfs/upload", post(upload_file))
+        .with_state(state)
 }
 
 async fn upload_file(

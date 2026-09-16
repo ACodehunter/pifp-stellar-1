@@ -99,7 +99,7 @@ pub struct RollupState {
 pub fn router(state: Arc<RollupState>) -> Router {
     Router::new()
         .route("/rollup/intents", post(submit_intent))
-    .route("/rollup/balance/{address}", get(get_balance))
+        .route("/rollup/balance/{address}", get(get_balance))
         .route("/rollup/batches", get(get_batches))
         .route("/rollup/settle", post(settle_now))
         .with_state(state)
@@ -334,7 +334,11 @@ pub fn canonical_intent_message(
     )
 }
 
-fn verify_signature(public_key_b64: &str, signature_b64: &str, message: &[u8]) -> Result<(), String> {
+fn verify_signature(
+    public_key_b64: &str,
+    signature_b64: &str,
+    message: &[u8],
+) -> Result<(), String> {
     let public_key_bytes = BASE64
         .decode(public_key_b64)
         .map_err(|_| "public_key is not valid base64".to_string())?;

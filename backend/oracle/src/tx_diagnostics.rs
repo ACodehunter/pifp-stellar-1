@@ -39,10 +39,22 @@ impl TxDiagnosticsStore {
     }
 }
 
-pub fn build_failed_tx_diagnostics(tx_hash: &str, tx_result: &Value, failure_point: &str) -> TxDiagnostics {
+pub fn build_failed_tx_diagnostics(
+    tx_hash: &str,
+    tx_result: &Value,
+    failure_point: &str,
+) -> TxDiagnostics {
     let result = tx_result.get("result").unwrap_or(tx_result);
     let status = read_string_field(result, &["status"]).unwrap_or_else(|| "FAILED".to_string());
-    let result_xdr = read_string_field(result, &["resultXdr", "result_xdr", "resultMetaXdr", "result_meta_xdr"]);
+    let result_xdr = read_string_field(
+        result,
+        &[
+            "resultXdr",
+            "result_xdr",
+            "resultMetaXdr",
+            "result_meta_xdr",
+        ],
+    );
 
     let diagnostic_events = read_diagnostic_events(result);
     let soroban_error_code = extract_error_code(result, &diagnostic_events);
@@ -79,7 +91,8 @@ pub fn map_error_code(code: Option<i64>) -> (String, Vec<String>) {
         Some(6) => (
             "Oracle not authorized".to_string(),
             vec![
-                "Grant oracle role for the submitting address on the protocol contract.".to_string(),
+                "Grant oracle role for the submitting address on the protocol contract."
+                    .to_string(),
                 "Retry after role assignment transaction is confirmed.".to_string(),
             ],
         ),
@@ -87,7 +100,8 @@ pub fn map_error_code(code: Option<i64>) -> (String, Vec<String>) {
             "Project has expired".to_string(),
             vec![
                 "Review expiration and grace-period policy for the project.".to_string(),
-                "Trigger the expired-project recovery path instead of verify_and_release.".to_string(),
+                "Trigger the expired-project recovery path instead of verify_and_release."
+                    .to_string(),
             ],
         ),
         Some(16) => (
@@ -100,15 +114,18 @@ pub fn map_error_code(code: Option<i64>) -> (String, Vec<String>) {
         Some(other) => (
             format!("Unknown Soroban contract error code {other}"),
             vec![
-                "Inspect diagnostic events and result_xdr for contract-specific failure details.".to_string(),
-                "Retry only after identifying and resolving the underlying contract precondition.".to_string(),
+                "Inspect diagnostic events and result_xdr for contract-specific failure details."
+                    .to_string(),
+                "Retry only after identifying and resolving the underlying contract precondition."
+                    .to_string(),
             ],
         ),
         None => (
             "Unable to determine exact contract error code".to_string(),
             vec![
                 "Inspect diagnostic_events and result_xdr for execution trace details.".to_string(),
-                "Re-run simulation to reproduce and isolate the failing cross-contract hop.".to_string(),
+                "Re-run simulation to reproduce and isolate the failing cross-contract hop."
+                    .to_string(),
             ],
         ),
     }
@@ -145,7 +162,11 @@ fn extract_error_code(root: &Value, diagnostic_events: &[Value]) -> Option<i64> 
             diagnostic_events
                 .iter()
                 .find_map(search_nested_for_code)
-                .or_else(|| diagnostic_events.iter().find_map(scan_values_for_tagged_code))
+                .or_else(|| {
+                    diagnostic_events
+                        .iter()
+                        .find_map(scan_values_for_tagged_code)
+                })
         })
 }
 
@@ -171,7 +192,9 @@ fn read_number_field(root: &Value, candidates: &[&str]) -> Option<i64> {
 fn search_nested_for_code(value: &Value) -> Option<i64> {
     match value {
         Value::Object(map) => {
-            if let Some(code) = read_number_field(value, &["code", "errorCode", "contractErrorCode"]) {
+            if let Some(code) =
+                read_number_field(value, &["code", "errorCode", "contractErrorCode"])
+            {
                 return Some(code);
             }
             map.values().find_map(search_nested_for_code)

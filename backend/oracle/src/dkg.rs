@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use k256::elliptic_curve::rand_core::OsRng;
 /// Distributed Key Generation (DKG) protocol for decentralized oracle nodes.
 ///
 /// Implements Feldman's Verifiable Secret Sharing (VSS) scheme so that `t`
@@ -9,7 +10,6 @@
 /// Round 2 — each node sends encrypted secret shares to every other node.
 /// Finalize — each node verifies received shares and derives its key share.
 use k256::{elliptic_curve::PrimeField, ProjectivePoint, Scalar};
-use k256::elliptic_curve::rand_core::OsRng;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tracing::{error, info, warn};
